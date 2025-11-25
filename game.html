@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Color Mind Match - Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    body.theme-dark {
+      background: #020617;
+      color: #e5e7eb;
+    }
+
+    body.theme-light {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    body.theme-neon {
+      background: radial-gradient(circle at top, #0f172a 0, #020617 50%, #000 100%);
+      color: #e0f2fe;
+    }
+
+    .game-container {
+      background: #020617;
+      padding: 20px 24px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      width: 100%;
+      max-width: 460px;
+      text-align: center;
+      border: 1px solid rgba(148,163,184,0.3);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    body.theme-light .game-container {
+      background: #ffffff;
+      border-color: #d1d5db;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    body.theme-neon .game-container {
+      background: radial-gradient(circle at top, #020617 0, #020617 60%, #000 100%);
+      border-color: #22d3ee;
+      box-shadow: 0 0 30px rgba(56,189,248,0.5);
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 6px;
+      color: #fbbf24;
+    }
+
+    body.theme-light h1 {
+      color: #ca8a04;
+    }
+
+    body.theme-neon h1 {
+      color: #22d3ee;
+      text-shadow: 0 0 8px rgba(56,189,248,0.8);
+    }
+
+    .small-text {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-bottom: 14px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .info-block {
+      flex: 1;
+      min-width: 90px;
+    }
+
+    .info-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+      opacity: 0.7;
+    }
+
+    .info-value {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .progress-bar-wrapper {
+      width: 100%;
+      height: 8px;
+      background: rgba(148,163,184,0.25);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+      transform-origin: left center;
+      transition: transform 0.15s linear;
+    }
+
+    .word-box {
+      margin: 10px 0 16px;
+      padding: 14px;
+      border-radius: 12px;
+      background: radial-gradient(circle at top, rgba(250,250,250,0.06), #020617 55%);
+      border: 1px solid rgba(148,163,184,0.5);
+      transition: transform 0.15s ease;
+    }
+
+    body.theme-light .word-box {
+      background: #f9fafb;
+      border-color: #e5e7eb;
+    }
+
+    body.theme-neon .word-box {
+      border-color: #22d3ee;
+      box-shadow: 0 0 12px rgba(56,189,248,0.4);
+    }
+
+    .word-box.pop {
+      transform: scale(1.03);
+    }
+
+    .shake {
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-3px); }
+    }
+
+    #colorWord {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .color-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 22px 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #020617;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.15s;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+
+    .color-btn:active {
+      transform: translateY(2px) scale(0.97);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+    }
+
+    .color-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    body.theme-light .color-btn {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .status-text {
+      min-height: 18px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    .good {
+      color: #4ade80;
+    }
+
+    .bad {
+      color: #f97373;
+    }
+
+    .neutral {
+      opacity: 0.8;
+    }
+
+    .controls {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    #startBtn, #hintBtn, #shareBtn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 2px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.2s;
+    }
+
+    #startBtn {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #020617;
+      box-shadow: 0 10px 25px rgba(22,163,74,0.5);
+    }
+
+    #hintBtn {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: #e5e7eb;
+      box-shadow: 0 8px 18px rgba(37,99,235,0.5);
+    }
+
+    #shareBtn {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #020617;
+      box-shadow: 0 8px 18px rgba(234,88,12,0.5);
+    }
+
+    #startBtn:active, #hintBtn:active, #shareBtn:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.5);
+    }
+
+    #startBtn:disabled, #hintBtn:disabled, #shareBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .settings-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    select, input[type="checkbox"], input[type="text"], textarea {
+      font-size: 11px;
+    }
+
+    .settings-row select {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: #020617;
+      color: #e5e7eb;
+      outline: none;
+    }
+
+    body.theme-light .settings-row select {
+      background: #f9fafb;
+      color: #111827;
+      border-color: #d1d5db;
+    }
+
+    body.theme-neon .settings-row select {
+      background: #020617;
+      color: #e0f2fe;
+      border-color: #22d3ee;
+    }
+
+    .settings-row label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hint-text {
+      font-size: 11px;
+      opacity: 0.7;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.7;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    .player-section {
+      margin-top: 4px;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .player-input-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .player-input-row input {
+      flex: 1;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: transparent;
+      color: inherit;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .leaderboard-list {
+      list-style: none;
+      font-size: 11px;
+      max-height: 80px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .leaderboard-list li {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed rgba(148,163,184,0.3);
+      padding: 2px 0;
+    }
+
+    .leaderboard-name {
+      max-width: 60%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .feedback-section {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(148,163,184,0.4);
+      text-align: left;
+      font-size: 12px;
+      display: none;
+    }
+
+    .feedback-section label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 11px;
+    }
+
+    .feedback-section select,
+    .feedback-section textarea {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .feedback-section select {
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: transparent;
+      color: inherit;
+      outline: none;
+    }
+
+    .feedback-section textarea {
+      border-radius: 8px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: transparent;
+      color: inherit;
+      outline: none;
+      padding: 6px 8px;
+      resize: vertical;
+      min-height: 50px;
+      font-size: 12px;
+    }
+
+    .feedback-section button {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #e5e7eb;
+      box-shadow: 0 6px 16px rgba(79,70,229,0.5);
+    }
+
+    .feedback-thanks {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 20px;
+      }
+      #colorWord {
+        font-size: 24px;
+      }
+      .color-btn {
+        padding: 18px 6px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body class="theme-dark">
+  <div class="game-container">
+    <h1>Color Mind Match</h1>
+    <div class="small-text">Click the color that matches the <b>WORD</b>, not the text color.</div>
+
+    <div class="info-row">
+      <div class="info-block">
+        <div class="info-label">Score</div>
+        <div class="info-value" id="score">0</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Best</div>
+        <div class="info-value" id="highScore">0</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Time</div>
+        <div class="info-value" id="time">30</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">Coins</div>
+        <div class="info-value" id="coins">0</div>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrapper">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="word-box" id="wordBox">
+      <div id="colorWord">READY?</div>
+    </div>
+
+    <div class="options-grid">
+      <button class="color-btn" id="btn0"></button>
+      <button class="color-btn" id="btn1"></button>
+      <button class="color-btn" id="btn2"></button>
+      <button class="color-btn" id="btn3"></button>
+    </div>
+
+    <div class="status-text neutral" id="status">Choose your options & press Start.</div>
+
+    <div class="controls">
+      <div>
+        <button id="startBtn">Start Game</button>
+        <button id="hintBtn" disabled>Hint (-2 coins)</button>
+        <button id="shareBtn" disabled>Share Score</button>
+      </div>
+
+      <div class="settings-row">
+        <label>
+          Mode
+          <select id="difficulty">
+            <option value="easy">Easy 😌</option>
+            <option value="normal" selected>Normal 😎</option>
+            <option value="hard">Hard 🔥</option>
+          </select>
+        </label>
+
+        <label>
+          Theme
+          <select id="theme">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="neon">Neon</option>
+          </select>
+        </label>
+
+        <label>
+          <input type="checkbox" id="soundToggle" checked />
+          Sound
+        </label>
+      </div>
+
+      <div class="hint-text">
+        Streak 3+ = Bonus points 🔥 • Use coins to take hints 🎯
+      </div>
+    </div>
+
+    <div class="player-section">
+      <div class="section-title">Player & Leaderboard</div>
+      <div class="player-input-row">
+        <input type="text" id="playerName" placeholder="Enter your name (for leaderboard)" />
+      </div>
+      <ul class="leaderboard-list" id="leaderboardList"></ul>
+    </div>
+
+    <div class="feedback-section" id="feedbackSection">
+      <div class="section-title">Feedback</div>
+      <label for="feedbackRating">How was the game?</label>
+      <select id="feedbackRating">
+        <option value="5">⭐ ⭐ ⭐ ⭐ ⭐ - Loved it!</option>
+        <option value="4">⭐ ⭐ ⭐ ⭐ - Good</option>
+        <option value="3">⭐ ⭐ ⭐ - Okay</option>
+        <option value="2">⭐ ⭐ - Needs work</option>
+        <option value="1">⭐ - Bad</option>
+      </select>
+
+      <label for="feedbackText">Any suggestions or comments?</label>
+      <textarea id="feedbackText" placeholder="Type your feedback here..."></textarea>
+
+      <button id="feedbackSubmit">Submit Feedback</button>
+      <div class="feedback-thanks" id="feedbackThanks"></div>
+    </div>
+  </div>
+
+  <script>
+    // NEW storage keys so all old data is ignored = fresh game
+    const STORAGE_KEYS = {
+      highScore: "cm2HighScore",
+      coins: "cm2Coins",
+      leaderboard: "cm2Leaderboard",
+      feedback: "cm2Feedback"
+    };
+
+    const colors = [
+      { name: "RED",    code: "#ef4444" },
+      { name: "BLUE",   code: "#3b82f6" },
+      { name: "GREEN",  code: "#22c55e" },
+      { name: "YELLOW", code: "#eab308" },
+      { name: "PURPLE", code: "#a855f7" },
+      { name: "ORANGE", code: "#f97316" }
+    ];
+
+    const colorWordEl = document.getElementById("colorWord");
+    const scoreEl = document.getElementById("score");
+    const timeEl = document.getElementById("time");
+    const coinsEl = document.getElementById("coins");
+    const statusEl = document.getElementById("status");
+    const startBtn = document.getElementById("startBtn");
+    const hintBtn = document.getElementById("hintBtn");
+    const shareBtn = document.getElementById("shareBtn");
+    const highScoreEl = document.getElementById("highScore");
+    const wordBox = document.getElementById("wordBox");
+    const difficultySelect = document.getElementById("difficulty");
+    const themeSelect = document.getElementById("theme");
+    const soundToggle = document.getElementById("soundToggle");
+    const progressBar = document.getElementById("progressBar");
+    const playerNameInput = document.getElementById("playerName");
+    const leaderboardList = document.getElementById("leaderboardList");
+    const feedbackSection = document.getElementById("feedbackSection");
+    const feedbackRating = document.getElementById("feedbackRating");
+    const feedbackText = document.getElementById("feedbackText");
+    const feedbackSubmit = document.getElementById("feedbackSubmit");
+    const feedbackThanks = document.getElementById("feedbackThanks");
+
+    const buttons = [
+      document.getElementById("btn0"),
+      document.getElementById("btn1"),
+      document.getElementById("btn2"),
+      document.getElementById("btn3")
+    ];
+
+    let score = 0;
+    let coins = 0;
+    let timeLeft = 30;
+    let totalTime = 30;
+    let timerId = null;
+    let correctAnswer = "";
+    let gameRunning = false;
+    let highScore = 0;
+    let wrongPenalty = 1;
+    let streak = 0;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx && soundToggle.checked) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtx = new AudioContext();
+        }
+      }
+    }
+
+    function playTone(freq, duration, type = "sine", volume = 0.12) {
+      if (!audioCtx || !soundToggle.checked) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.value = volume;
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      setTimeout(() => {
+        osc.stop();
+      }, duration);
+    }
+
+    function playCorrect() {
+      playTone(900, 120, "triangle", 0.14);
+    }
+
+    function playWrong() {
+      playTone(220, 160, "square", 0.16);
+    }
+
+    function playTick() {
+      playTone(1200, 80, "square", 0.08);
+    }
+
+    function playBonus() {
+      playTone(1200, 160, "triangle", 0.16);
+      setTimeout(() => playTone(1500, 160, "triangle", 0.16), 160);
+    }
+
+    function loadHighScore() {
+      const saved = localStorage.getItem(STORAGE_KEYS.highScore);
+      if (saved !== null) {
+        highScore = parseInt(saved, 10) || 0;
+      } else {
+        highScore = 0;
+      }
+      highScoreEl.textContent = highScore;
+    }
+
+    function loadCoins() {
+      const saved = localStorage.getItem(STORAGE_KEYS.coins);
+      if (saved !== null) {
+        coins = parseInt(saved, 10) || 0;
+      } else {
+        coins = 0;
+      }
+      coinsEl.textContent = coins;
+    }
+
+    function loadLeaderboard() {
+      const raw = localStorage.getItem(STORAGE_KEYS.leaderboard);
+      let list = [];
+      if (raw) {
+        try {
+          list = JSON.parse(raw) || [];
+        } catch (e) {
+          list = [];
+        }
+      }
+      return list;
+    }
+
+    function saveLeaderboard(list) {
+      localStorage.setItem(STORAGE_KEYS.leaderboard, JSON.stringify(list));
+    }
+
+    function renderLeaderboard() {
+      const list = loadLeaderboard();
+      list.sort((a, b) => b.score - a.score);
+      const top5 = list.slice(0, 5);
+      leaderboardList.innerHTML = "";
+      top5.forEach((entry, index) => {
+        const li = document.createElement("li");
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "leaderboard-name";
+        nameSpan.textContent = `${index + 1}. ${entry.name || "Player"}`;
+        const scoreSpan = document.createElement("span");
+        scoreSpan.textContent = entry.score;
+        li.appendChild(nameSpan);
+        li.appendChild(scoreSpan);
+        leaderboardList.appendChild(li);
+      });
+    }
+
+    // Initial load (fresh for this new version)
+    loadHighScore();
+    loadCoins();
+    renderLeaderboard();
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function setButtonsEnabled(enabled) {
+      buttons.forEach(btn => {
+        if (enabled) {
+          btn.classList.remove("disabled");
+        } else {
+          btn.classList.add("disabled");
+        }
+      });
+    }
+
+    function popWordBox() {
+      wordBox.classList.add("pop");
+      setTimeout(() => wordBox.classList.remove("pop"), 120);
+    }
+
+    function shakeWordBox() {
+      wordBox.classList.add("shake");
+      setTimeout(() => wordBox.classList.remove("shake"), 300);
+    }
+
+    function getDifficultySettings(mode) {
+      if (mode === "easy") {
+        return { time: 40, penalty: 0, coinPerCorrect: 1 };
+      } else if (mode === "hard") {
+        return { time: 20, penalty: 2, coinPerCorrect: 2 };
+      }
+      return { time: 30, penalty: 1, coinPerCorrect: 1 }; // normal
+    }
+
+    function updateProgressBar() {
+      const ratio = Math.max(0, timeLeft) / totalTime;
+      progressBar.style.transform = `scaleX(${ratio})`;
+    }
+
+    function updateCoinsDisplay() {
+      coinsEl.textContent = coins;
+      hintBtn.disabled = !gameRunning || coins < 2;
+      localStorage.setItem(STORAGE_KEYS.coins, coins.toString());
+    }
+
+    function newRound() {
+      const correct = colors[Math.floor(Math.random() * colors.length)];
+      correctAnswer = correct.name;
+
+      colorWordEl.textContent = correct.name;
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      colorWordEl.style.color = randomColor.code;
+
+      const otherColors = colors.filter(c => c.name !== correct.name);
+      shuffle(otherColors);
+      const options = shuffle([correct, otherColors[0], otherColors[1], otherColors[2]]);
+
+      options.forEach((opt, index) => {
+        const btn = buttons[index];
+        btn.textContent = opt.name;
+        btn.style.background = opt.code;
+      });
+
+      popWordBox();
+    }
+
+    function resetGameState() {
+      const mode = difficultySelect.value;
+      const settings = getDifficultySettings(mode);
+      timeLeft = settings.time;
+      totalTime = settings.time;
+      wrongPenalty = settings.penalty;
+      streak = 0;
+
+      score = 0;
+      scoreEl.textContent = score;
+      timeEl.textContent = timeLeft;
+      updateProgressBar();
+      updateCoinsDisplay();
+      statusEl.textContent = "Game started! Mode: " + mode.toUpperCase();
+      statusEl.className = "status-text neutral";
+      colorWordEl.style.color = "#e5e7eb";
+      feedbackSection.style.display = "none";
+      feedbackThanks.textContent = "";
+      shareBtn.disabled = true;
+    }
+
+    function startGame() {
+      if (gameRunning) return;
+
+      initAudio();
+      resetGameState();
+      gameRunning = true;
+      startBtn.disabled = true;
+      startBtn.textContent = "Playing...";
+      setButtonsEnabled(true);
+      hintBtn.disabled = coins < 2;
+      newRound();
+
+      if (timerId) clearInterval(timerId);
+      timerId = setInterval(() => {
+        timeLeft--;
+        timeEl.textContent = timeLeft;
+        updateProgressBar();
+
+        if (timeLeft <= 5 && timeLeft > 0) {
+          playTick();
+        }
+
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      clearInterval(timerId);
+      gameRunning = false;
+      setButtonsEnabled(false);
+      colorWordEl.textContent = "TIME UP!";
+      colorWordEl.style.color = "#f97316";
+
+      let finalMsg = "Your final score: " + score;
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem(STORAGE_KEYS.highScore, highScore);
+        highScoreEl.textContent = highScore;
+        finalMsg += " 🎉 New High Score!";
+        statusEl.className = "status-text good";
+      } else {
+        statusEl.className = "status-text neutral";
+      }
+
+      statusEl.textContent = finalMsg;
+      startBtn.disabled = false;
+      startBtn.textContent = "Play Again";
+      hintBtn.disabled = true;
+      shareBtn.disabled = false;
+
+      const name = playerNameInput.value.trim() || "Player";
+      const list = loadLeaderboard();
+      list.push({ name, score, date: Date.now() });
+      saveLeaderboard(list);
+      renderLeaderboard();
+
+      feedbackSection.style.display = "block";
+    }
+
+    function handleChoice(chosen) {
+      if (!gameRunning) return;
+
+      if (chosen === correctAnswer) {
+        score++;
+        streak++;
+        const modeSettings = getDifficultySettings(difficultySelect.value);
+        coins += modeSettings.coinPerCorrect;
+
+        if (streak >= 3) {
+          score += 2;
+          coins += 1;
+          statusEl.textContent = `Nice! ✅ Streak x${streak} (+Bonus)`;
+          statusEl.className = "status-text good";
+          playBonus();
+        } else {
+          statusEl.textContent = "Nice! ✅";
+          statusEl.className = "status-text good";
+          playCorrect();
+        }
+      } else {
+        streak = 0;
+        statusEl.textContent = "Oops, wrong! ❌";
+        statusEl.className = "status-text bad";
+        playWrong();
+        shakeWordBox();
+        if (wrongPenalty > 0 && score > 0) {
+          score = Math.max(0, score - wrongPenalty);
+        }
+      }
+
+      scoreEl.textContent = score;
+      updateCoinsDisplay();
+      newRound();
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        handleChoice(btn.textContent);
+      });
+    });
+
+    startBtn.addEventListener("click", startGame);
+
+    hintBtn.addEventListener("click", () => {
+      if (!gameRunning || coins < 2) return;
+      coins -= 2;
+      updateCoinsDisplay();
+      buttons.forEach(btn => {
+        if (btn.textContent === correctAnswer) {
+          btn.style.boxShadow = "0 0 18px rgba(250,250,250,0.9)";
+          setTimeout(() => {
+            btn.style.boxShadow = "";
+          }, 1500);
+        }
+      });
+      statusEl.textContent = "Hint used! (-2 coins)";
+      statusEl.className = "status-text neutral";
+    });
+
+    themeSelect.addEventListener("change", () => {
+      const theme = themeSelect.value;
+      document.body.classList.remove("theme-dark", "theme-light", "theme-neon");
+      document.body.classList.add("theme-" + theme);
+    });
+
+    shareBtn.addEventListener("click", async () => {
+      const name = playerNameInput.value.trim() || "Player";
+      const mode = difficultySelect.value.toUpperCase();
+      const text = `${name} scored ${score} points in Color Mind Match (${mode})! Can you beat this? 🎮🔥`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ text });
+        } catch (e) {}
+      } else if (navigator.clipboard) {
+        try {
+          await navigator.clipboard.writeText(text);
+          statusEl.textContent = "Score text copied! Paste & share anywhere 😎";
+          statusEl.className = "status-text good";
+        } catch (e) {
+          statusEl.textContent = "Could not copy, but you can share manually.";
+        }
+      } else {
+        alert(text);
+      }
+    });
+
+    feedbackSubmit.addEventListener("click", () => {
+      const rating = feedbackRating.value;
+      const text = feedbackText.value.trim();
+      const name = playerNameInput.value.trim() || "Player";
+
+      const feedbackObj = {
+        name,
+        rating: parseInt(rating, 10),
+        text,
+        time: Date.now()
+      };
+
+      const raw = localStorage.getItem(STORAGE_KEYS.feedback);
+      let list = [];
+      if (raw) {
+        try {
+          list = JSON.parse(raw) || [];
+        } catch (e) {
+          list = [];
+        }
+      }
+      list.push(feedbackObj);
+      localStorage.setItem(STORAGE_KEYS.feedback, JSON.stringify(list));
+
+      feedbackThanks.textContent = "Thanks for your feedback! 💚";
+      feedbackText.value = "";
+    });
+
+    setButtonsEnabled(false);
+    updateProgressBar();
+    updateCoinsDisplay();
+  </script>
+</body>
+</html>
